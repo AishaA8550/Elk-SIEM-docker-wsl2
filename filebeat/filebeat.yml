@@ -1,0 +1,57 @@
+# Filebeat Configuration for WSL2 SIEM
+filebeat.inputs:
+- type: filestream
+  id: syslog
+  paths:
+    - /var/log/syslog
+    - /var/log/auth.log
+  fields:
+    log_type: "system"
+    environment: "wsl2-siem"
+  fields_under_root: true
+  parsers:
+    - ndjson:
+        target: ""
+        overwrite_keys: true
+
+- type: log
+  id: commands
+  paths:
+    - /var/log/syslog
+  include_lines: ['COMMAND=']
+  fields:
+    log_type: "command_audit"
+    environment: "wsl2-siem"
+  fields_under_root: true
+
+# Processors for log enhancement
+processors:
+  - add_host_metadata:
+      when.not.contains.tags: forwarded
+  - add_cloud_metadata: ~
+  - add_docker_metadata: ~
+
+# Output to Elasticsearch
+output.elasticsearch:
+  hosts: ["localhost:9200"]
+  username: "elastic"
+  password: "changeme"
+  index: "filebeat-wsl-%{+yyyy.MM.dd}"
+  ssl.enabled: false
+
+# Setup
+setup.ilm.enabled: true
+setup.template.name: "filebeat-wsl"
+setup.template.pattern: "filebeat-wsl-*"
+
+# Monitoring
+monitoring.enabled: true
+
+# Logging
+logging.level: info
+logging.to_files: true
+logging.files:
+  path: /var/log/filebeat
+  name: filebeat
+  keepfiles: 7
+  permissions: 0644
