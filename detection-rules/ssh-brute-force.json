@@ -1,0 +1,52 @@
+{
+  "rule_id": "ssh_brute_force_detection",
+  "risk_score": 80,
+  "severity": "high",
+  "description": "Detects SSH brute force attacks based on failed login threshold",
+  "type": "query",
+  "query": "event.dataset: system.auth AND message: \"Failed password\" AND event.outcome: failure",
+  "index": [
+    "filebeat-wsl-*"
+  ],
+  "aggregation": {
+    "group_by": [
+      "source.ip",
+      "user.name"
+    ],
+    "agg_type": "cardinality",
+    "agg_field": "event.id",
+    "time_window": "5m",
+    "threshold": {
+      "value": 5,
+      "operator": "gt"
+    }
+  },
+  "false_positives": [
+    "Legitimate users forgetting passwords",
+    "Service account misconfigurations"
+  ],
+  "tags": [
+    "attack.t1190",
+    "attack.credential_access",
+    "siem"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "name": "Credential Access",
+        "id": "TA0006"
+      },
+      "technique": [
+        {
+          "name": "Brute Force",
+          "id": "T1110"
+        }
+      ]
+    }
+  ],
+  "note": "Custom rule optimized for WSL2 environment. Adjust threshold based on baseline activity.",
+  "interval": "1m",
+  "from": "now-5m",
+  "max_signals": 100
+}
