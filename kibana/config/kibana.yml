@@ -1,0 +1,26 @@
+# Kibana Configuration
+server.name: kibana
+server.host: "0.0.0.0"
+server.port: 5601
+
+# Elasticsearch Connection
+elasticsearch.hosts: [ "http://elasticsearch:9200" ]
+elasticsearch.username: "elastic"
+elasticsearch.password: "changeme"
+
+# Security Encryption Keys (Critical for production)
+xpack.encryptedSavedObjects.encryptionKey: "d4e5f678901234567890123456789012345678901234567890123456789012"
+xpack.security.encryptionKey: "a1b2c3d4e5f6789012345678901234567890123456789012345678901234567890"
+xpack.reporting.encryptionKey: "f1e2d3c4b5a6789012345678901234567890123456789012345678901234567890"
+
+# Security Features
+xpack.security.session.idleTimeout: "1h"
+xpack.security.session.lifespan: "30d"
+
+# Monitoring
+monitoring.ui.container.elasticsearch.enabled: true
+monitoring.ui.container.logstash.enabled: true
+
+# Feature Flags
+xpack.fleet.enabled: true
+xpack.observability.enabled: true
