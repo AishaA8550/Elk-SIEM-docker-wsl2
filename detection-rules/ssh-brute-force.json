@@ -2,34 +2,28 @@
   "rule_id": "ssh_brute_force_detection",
   "risk_score": 80,
   "severity": "high",
-  "description": "Detects SSH brute force attacks based on failed login threshold",
+  "description": "Detects SSH brute force attacks based on failed login threshold - WSL2 Optimized",
   "type": "query",
-  "query": "event.dataset: system.auth AND message: \"Failed password\" AND event.outcome: failure",
+  "query": "message: \"Failed password*\" AND input.type: \"filestream\"",
   "index": [
     "filebeat-wsl-*"
   ],
   "aggregation": {
     "group_by": [
-      "source.ip",
-      "user.name"
+      "source.ip"
     ],
-    "agg_type": "cardinality",
-    "agg_field": "event.id",
-    "time_window": "5m",
+    "agg_type": "value_count",
+    "agg_field": "@timestamp",
+    "time_window": "2m",
     "threshold": {
-      "value": 5,
+      "value": 3,
       "operator": "gt"
     }
   },
   "false_positives": [
-    "Legitimate users forgetting passwords",
-    "Service account misconfigurations"
+    "Legitimate users forgetting passwords"
   ],
-  "tags": [
-    "attack.t1190",
-    "attack.credential_access",
-    "siem"
-  ],
+  "tags": ["attack.t1190", "siem", "wsl2"],
   "threat": [
     {
       "framework": "MITRE ATT&CK",
@@ -45,8 +39,7 @@
       ]
     }
   ],
-  "note": "Custom rule optimized for WSL2 environment. Adjust threshold based on baseline activity.",
+  "note": "Optimized for WSL2 - uses raw message field and lower threshold (3 attempts in 2 minutes)",
   "interval": "1m",
-  "from": "now-5m",
-  "max_signals": 100
+  "from": "now-5m"
 }
