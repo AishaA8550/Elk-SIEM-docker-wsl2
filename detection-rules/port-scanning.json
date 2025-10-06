@@ -1,40 +1,29 @@
-## File 7: `detection-rules/port-scanning.json`
-
-**Commit Message:** `feat: add port scanning detection rule`
-
-```json
 {
   "rule_id": "nmap_port_scan_detection",
   "risk_score": 70,
   "severity": "medium",
-  "description": "Detects port scanning activity using Nmap or similar tools",
+  "description": "Detects port scanning activity using Nmap - WSL2 Optimized",
   "type": "query",
-  "query": "message: \"nmap\" OR message: \"PORT.*SCAN\" OR message: \"connect.*from.*port\" OR (process.name: nmap AND event.action: executed)",
+  "query": "message: \"*nmap*\"",
   "index": [
     "filebeat-wsl-*"
   ],
   "aggregation": {
     "group_by": [
-      "source.ip",
-      "process.name"
+      "user.name"
     ],
-    "agg_type": "cardinality",
-    "agg_field": "destination.port",
-    "time_window": "2m",
+    "agg_type": "value_count",
+    "agg_field": "@timestamp",
+    "time_window": "5m",
     "threshold": {
-      "value": 10,
+      "value": 1,
       "operator": "gt"
     }
   },
   "false_positives": [
-    "Legitimate network scanning for administration",
-    "Security testing activities"
+    "Legitimate network administration"
   ],
-  "tags": [
-    "attack.t1046",
-    "attack.discovery",
-    "siem"
-  ],
+  "tags": ["attack.t1046", "siem", "wsl2"],
   "threat": [
     {
       "framework": "MITRE ATT&CK",
@@ -50,11 +39,7 @@
       ]
     }
   ],
-  "note": "Detects both command execution and network connection patterns. WSL2 environment requires raw message parsing.",
+  "note": "WSL2 optimized - detects any nmap command execution. Single occurrence triggers alert.",
   "interval": "2m",
-  "from": "now-5m",
-  "max_signals": 50
+  "from": "now-5m"
 }
-```
-
-**Continue?**
